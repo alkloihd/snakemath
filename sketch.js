@@ -35,18 +35,18 @@ function draw() {
     background(BG_COLOR);
     drawTopPanel();
     drawGrid();
-    
+
     if (game_state === 'RUNNING') {
         moveSnake();
         handleCollisions();
     }
-    
+
     drawSnake();
     drawFoodItems();
     drawConfettiParticles();
     drawXMarks();
     drawCheckMarks();
-    
+
     if (game_state === 'PAUSED') {
         drawPauseMenu();
     }
@@ -65,7 +65,7 @@ function keyPressed() {
             game_state = 'RUNNING';
         }
     }
-    
+
     if (game_state === 'RUNNING') {
         if (keyCode === UP_ARROW && direction !== 'DOWN') {
             direction = 'UP';
@@ -79,7 +79,7 @@ function keyPressed() {
             game_state = 'PAUSED';
         }
     }
-    
+
     if (game_state === 'PAUSED') {
         if (key === 'C' || key === 'c') {
             game_state = 'RUNNING';
@@ -87,7 +87,7 @@ function keyPressed() {
             resetGame();
         }
     }
-    
+
     if (game_state === 'GAME_OVER') {
         if (key === 'R' || key === 'r') {
             resetGame();
@@ -139,7 +139,7 @@ function generateMathProblem() {
     let operations = ['+', '-', '*', '/'];
     let operation = random(operations);
     let a, b, question, answer;
-    
+
     switch(operation) {
         case '+':
             a = floor(random(0, 51));
@@ -166,7 +166,7 @@ function generateMathProblem() {
             question = `${a} ÷ ${b}`;
             break;
     }
-    
+
     return {question, answer};
 }
 
@@ -193,7 +193,7 @@ function generateFood() {
     snake.forEach(segment => {
         food_positions.add(`${segment.x},${segment.y}`);
     });
-    
+
     all_answers.forEach(value => {
         let pos;
         do {
@@ -266,7 +266,7 @@ function handleCollisions() {
             break;
         }
     }
-    
+
     if (lives <=0) {
         game_state = 'GAME_OVER';
     }
@@ -276,13 +276,13 @@ function drawTopPanel() {
     fill(TOP_PANEL_COLOR);
     noStroke();
     rect(0, 0, width, 100);
-    
+
     // Draw Math Problem
     fill(TEXT_COLOR);
     textSize(24);
     textAlign(CENTER, CENTER);
     text(`Solve: ${current_problem.question}`, width / 2, 60);
-    
+
     // Draw Score and Lives
     textSize(20);
     textAlign(RIGHT, TOP);
@@ -414,7 +414,7 @@ function drawPauseMenu() {
     fill('rgba(0,0,0,0.5)');
     noStroke();
     rect(0,0,width,height);
-    
+
     fill(TEXT_COLOR);
     textSize(20);
     textAlign(CENTER, CENTER);
@@ -426,12 +426,12 @@ function drawGameOver() {
     fill('rgba(0,0,0,0.7)');
     noStroke();
     rect(0,0,width,height);
-    
+
     fill(TEXT_COLOR);
     textSize(40);
     textAlign(CENTER, CENTER);
     text("Game Over!", width/2, height/2 - 100);
-    
+
     textSize(24);
     text(`Final Score: ${score_correct}/${score_total}`, width/2, height/2 - 50);
     text("Press 'R' to Restart or 'Q' to Quit.", width/2, height/2);
