@@ -28,8 +28,13 @@ let selected_speed = 3; // Default speed
 let speedButtons = [];
 let startButton;
 
+// Canvas Element
+let canvasElem;
+
 function setup() {
-    createCanvas(CELL_SIZE * GRID_WIDTH, CELL_SIZE * GRID_HEIGHT + 100);
+    canvasElem = createCanvas(CELL_SIZE * GRID_WIDTH, CELL_SIZE * GRID_HEIGHT + 100);
+    // Center the canvas on the window
+    canvasElem.position((windowWidth - width) / 2, (windowHeight - height) / 2);
     frameRate(FPS_VALUES[selected_speed]);
     textFont('Arial');
     initSnake();
@@ -41,6 +46,11 @@ function draw() {
     background(BG_COLOR);
 
     if (game_state === 'WELCOME') {
+        // Draw Title
+        fill(TEXT_COLOR);
+        textSize(36);
+        textAlign(CENTER, CENTER);
+        text("Math Snake by M. Lodhia", width / 2, 50);
         // Welcome screen is handled by DOM buttons
         return;
     }
@@ -103,25 +113,34 @@ function keyPressed() {
 // Function to create Welcome Screen Buttons
 function createWelcomeScreen() {
     // Create Speed Selection Buttons
+    let totalButtons = 5;
+    let buttonWidth = 60;
+    let buttonHeight = 60;
+    let spacing = 20;
+    let totalWidth = totalButtons * buttonWidth + (totalButtons -1) * spacing;
+    let startX = (width - totalWidth) / 2; // Center the buttons horizontally
+    let btnY = height / 2 - 50; // Position buttons vertically
+
     for (let i = 1; i <=5; i++) {
         let btn = createButton(i.toString());
-        btn.position((width / 2 - 200) + (i-1)*80, height / 2 - 50);
-        btn.size(60, 60);
+        btn.size(buttonWidth, buttonHeight);
         btn.style('font-size', '20px');
         btn.style('background-color', '#FFF');
         btn.style('border', '2px solid #000');
         btn.mousePressed(() => selectSpeed(i));
+        btn.position(canvasElem.position().x + startX + (i-1)*(buttonWidth + spacing), canvasElem.position().y + btnY);
         speedButtons.push(btn);
     }
 
     // Create Start Button
     startButton = createButton('Start Game');
-    startButton.position(width / 2 - 100, height / 2 + 50);
     startButton.size(200, 60);
     startButton.style('font-size', '24px');
     startButton.style('background-color', '#FFF');
     startButton.style('border', '2px solid #000');
     startButton.mousePressed(() => startGame());
+    // Center the Start button
+    startButton.position(canvasElem.position().x + width / 2 - 100, canvasElem.position().y + height / 2 + 50);
 }
 
 function selectSpeed(speed) {
