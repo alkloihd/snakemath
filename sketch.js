@@ -32,15 +32,12 @@ let startButton;
 let title = "Math Snake by M. Lodhia";
 let subtitle = "Use arrow keys to play and press Esc to pause";
 
-// Container for speed buttons
-let speedContainer;
-
-let canvas; // Canvas variable
+// Game Speed Label
+let speedLabel = "Game Speed";
 
 function setup() {
     // Adjusted Canvas Size: 800x700 (800 width, 600 game area + 100 top panel)
-    canvas = createCanvas(CELL_SIZE * GRID_WIDTH, CELL_SIZE * GRID_HEIGHT + 100);
-    canvas.parent('game-container'); // Assign canvas to container
+    createCanvas(CELL_SIZE * GRID_WIDTH, CELL_SIZE * GRID_HEIGHT + 100);
     frameRate(FPS_VALUES[selected_speed]);
     textFont('Arial');
     initSnake();
@@ -113,26 +110,14 @@ function keyPressed() {
 
 // Function to create Welcome Screen Buttons
 function createWelcomeScreen() {
-    // Create "Game Speed" Label
-    let speedLabel = createDiv('Game Speed');
-    speedLabel.style('color', TEXT_COLOR);
-    speedLabel.style('font-size', '24px');
-    speedLabel.style('text-align', 'center');
-    speedLabel.position(width / 2 - 75, 130); // Centered horizontally, y-position above buttons
-    speedLabel.parent('game-container');
-
-    // Create Speed Container Div
-    speedContainer = createDiv('');
-    speedContainer.style('display', 'flex');
-    speedContainer.style('justify-content', 'center');
-    speedContainer.style('gap', '20px');
-    speedContainer.position(width / 2 - 190, 180); // Centered horizontally, y-position set to 180px
-    speedContainer.parent('game-container');
+    // Calculate total width: 5 buttons * 60 + 4 gaps * 20 = 300 + 80 = 380
+    let total_buttons_width = 5 * 60 + 4 * 20;
+    let start_x = (width - total_buttons_width) / 2; // Center the buttons horizontally
 
     // Create Speed Selection Buttons
     for (let i = 1; i <=5; i++) {
         let btn = createButton(i.toString());
-        btn.parent(speedContainer); // Assign to speedContainer
+        btn.position(start_x + (i-1)*80, 220); // y-position set to 220px
         btn.size(60, 60);
         btn.style('font-size', '20px');
         btn.style('background-color', '#FFF');
@@ -143,8 +128,7 @@ function createWelcomeScreen() {
 
     // Create Start Button
     startButton = createButton('Start Game');
-    startButton.parent('game-container');
-    startButton.position(width / 2 - 100, 250); // Centered horizontally, y-position set to 250px
+    startButton.position(width / 2 - 100, 300); // Centered horizontally, y-position set to 300px
     startButton.size(200, 60);
     startButton.style('font-size', '24px');
     startButton.style('background-color', '#FFF');
@@ -167,11 +151,9 @@ function selectSpeed(speed) {
 
 function startGame() {
     game_state = 'RUNNING';
-    // Hide buttons and label
+    // Hide buttons
     speedButtons.forEach(btn => btn.hide());
     startButton.hide();
-    // Hide the "Game Speed" label
-    select('#game-container').child().elt.children[0].style.display = 'none'; // Assuming the first child is speedLabel
 }
 
 function initSnake() {
@@ -470,7 +452,11 @@ function drawWelcomeScreen() {
     textSize(20);
     text(subtitle, width / 2, 130); // y-position set to 130px
 
-    // "Game Speed" label is already created and positioned
+    // Draw Game Speed Label
+    textSize(24);
+    text(speedLabel, width / 2, 180); // y-position set to 180px
+
+    // Buttons are already created and positioned
 }
 
 function drawPauseMenu() {
