@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Morse 5/6 Math Snake</title>
+    <title>Math Snake by M. Lodhia</title>
     <!-- Include p5.js Library -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.6.0/p5.min.js"></script>
     <style>
@@ -15,14 +15,27 @@
             align-items: center;
             height: 100vh;
         }
+        #game-container {
+            position: relative;
+            width: 800px;
+            height: 700px; /* 600 game area + 100 top panel */
+        }
         #defaultCanvas0 {
             border: 2px solid #000;
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+        /* Optional: Style buttons for better appearance */
+        button {
+            cursor: pointer;
         }
     </style>
 </head>
 <body>
-    <!-- Game will be rendered here by p5.js -->
-    <script src="sketch.js"></script>
+    <div id="game-container">
+        <!-- Game will be rendered here by p5.js -->
+        <script src="sketch.js"></script>
+    </div>
 </body>
 </html>
-
