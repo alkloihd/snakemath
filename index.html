@@ -3,10 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <title>Morse 5/6 Math Snake</title>
-    <!-- Include PyScript CSS -->
-    <link rel="stylesheet" href="https://pyscript.net/latest/pyscript.css" />
-    <!-- Include PyScript JS -->
-    <script defer src="https://pyscript.net/latest/pyscript.js"></script>
+    <!-- Include p5.js Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.6.0/p5.min.js"></script>
     <style>
         body {
             background-color: #32A852; /* Dark green background */
@@ -17,22 +15,13 @@
             align-items: center;
             height: 100vh;
         }
-        #game-canvas {
-            background-color: #32A852; /* Match background */
+        #defaultCanvas0 {
             border: 2px solid #000;
         }
     </style>
 </head>
 <body>
-    <!-- PyScript Setup -->
-    <py-env>
-        - asyncio
-    </py-env>
-
-    <!-- Game Canvas -->
-    <canvas id="game-canvas" width="600" height="900"></canvas>
-
-    <!-- Main Python Script -->
-    <py-script src="main.py"></py-script>
+    <!-- Game will be rendered here by p5.js -->
+    <script src="sketch.js"></script>
 </body>
 </html>
