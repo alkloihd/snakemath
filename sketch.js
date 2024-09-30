@@ -443,11 +443,11 @@ function drawWelcomeScreen() {
     fill(TEXT_COLOR);
     textSize(32);
     textAlign(CENTER, CENTER);
-    text(title, width / 2, height / 2 - 150);
+    text(title, width / 2, height / 2 - 180);
 
     // Draw Subtitle
     textSize(20);
-    text(subtitle, width / 2, height / 2 - 100);
+    text(subtitle, width / 2, height / 2 - 80);
     
     // Buttons are already created and positioned
 }
