@@ -1,7 +1,7 @@
 // Game Constants
 const CELL_SIZE = 40;
-const GRID_WIDTH = 20;  // 800 / 40
-const GRID_HEIGHT = 15; // 600 / 40
+const GRID_WIDTH = 26;  // 1040 / 40
+const GRID_HEIGHT = 17; // 680 / 40
 const BG_COLOR = '#32A852';
 const TOP_PANEL_COLOR = '#228B22';
 const FOOD_COLOR = '#C8C8C8';
@@ -28,19 +28,25 @@ let selected_speed = 3; // Default speed
 let speedButtons = [];
 let startButton;
 
-// Title and Subtitle
-let title = "Math Snake by M. Lodhia";
-let subtitle = "Use arrow keys to play and press Esc to pause";
+// Labels
+let speedLabelElement;
+let titleElement;
+let subtitleElement;
 
-// Game Speed Label
-let speedLabel = "Game Speed";
-
-// Welcome Screen Container
-let welcomeDiv;
+// Canvas
+let canvas;
+let canvas_x, canvas_y;
 
 function setup() {
-    // Adjusted Canvas Size: 800x700 (800 width, 600 game area + 100 top panel)
-    createCanvas(800, 700);
+    // Adjusted Canvas Size: 1040x780 (1040 width, 680 game area + 100 top panel)
+    canvas = createCanvas(1040, 780);
+    canvas.style('display', 'block'); // Ensure block display for centering
+
+    // Calculate and set the canvas position to center it in the window
+    canvas_x = (windowWidth - width) / 2;
+    canvas_y = (windowHeight - height) / 2;
+    canvas.position(canvas_x, canvas_y);
+
     frameRate(FPS_VALUES[selected_speed]);
     textFont('Arial');
     initSnake();
@@ -52,8 +58,8 @@ function draw() {
     background(BG_COLOR);
 
     if (game_state === 'WELCOME') {
-        // Welcome screen elements are handled by DOM; no need to draw anything else
-        return;
+        // Welcome screen elements are handled by DOM elements
+        return; // Skip other drawing
     }
 
     drawTopPanel();
@@ -113,62 +119,48 @@ function keyPressed() {
 
 // Function to create Welcome Screen Elements
 function createWelcomeScreen() {
-    // Create a container div for the welcome screen
-    welcomeDiv = createDiv();
-    welcomeDiv.style('position', 'absolute');
-    welcomeDiv.style('top', '0px');
-    welcomeDiv.style('left', '0px');
-    welcomeDiv.style('width', '800px');
-    welcomeDiv.style('height', '700px');
-    welcomeDiv.style('display', 'flex');
-    welcomeDiv.style('flex-direction', 'column');
-    welcomeDiv.style('justify-content', 'center');
-    welcomeDiv.style('align-items', 'center');
-    welcomeDiv.style('color', TEXT_COLOR);
-    welcomeDiv.style('background-color', 'rgba(0, 0, 0, 0.0)'); // Transparent background
-
     // Create Title
-    let titleElement = createElement('h1', title);
-    titleElement.parent(welcomeDiv);
-    titleElement.style('margin-bottom', '10px'); // Space below title
+    titleElement = createElement('h1', 'Math Snake by M. Lodhia');
+    titleElement.style('color', TEXT_COLOR);
+    titleElement.style('font-size', '32px');
+    titleElement.position(canvas_x + width / 2 - titleElement.elt.offsetWidth / 2, 80 + canvas_y);
 
     // Create Subtitle
-    let subtitleElement = createElement('h3', subtitle);
-    subtitleElement.parent(welcomeDiv);
-    subtitleElement.style('margin-bottom', '30px'); // Space below subtitle
+    subtitleElement = createElement('h3', 'Use arrow keys to play and press Esc to pause');
+    subtitleElement.style('color', TEXT_COLOR);
+    subtitleElement.style('font-size', '20px');
+    subtitleElement.position(canvas_x + width / 2 - subtitleElement.elt.offsetWidth / 2, 130 + canvas_y);
 
     // Create Game Speed Label
-    let speedLabelElement = createElement('h2', speedLabel);
-    speedLabelElement.parent(welcomeDiv);
-    speedLabelElement.style('margin-bottom', '20px'); // Space below label
+    speedLabelElement = createElement('h2', 'Game Speed');
+    speedLabelElement.style('color', TEXT_COLOR);
+    speedLabelElement.style('font-size', '24px');
+    speedLabelElement.position(canvas_x + width / 2 - speedLabelElement.elt.offsetWidth / 2, 180 + canvas_y);
 
-    // Create Speed Buttons Container
-    let speedButtonsDiv = createDiv();
-    speedButtonsDiv.parent(welcomeDiv);
-    speedButtonsDiv.style('display', 'flex');
-    speedButtonsDiv.style('justify-content', 'center');
-    speedButtonsDiv.style('gap', '20px'); // 20px gap between buttons
+    // Create Speed Selection Buttons
+    // Total width: 5 buttons * 60 + 4 gaps * 20 = 300 + 80 = 380
+    let total_buttons_width = 5 * 60 + 4 * 20;
+    let start_x = (width - total_buttons_width) / 2; // 330px
 
-    for (let i = 1; i <= 5; i++) {
+    for (let i = 1; i <=5; i++) {
         let btn = createButton(i.toString());
+        btn.position(canvas_x + start_x + (i-1)*80, 220 + canvas_y); // y-position set to 220px
         btn.size(60, 60);
         btn.style('font-size', '20px');
         btn.style('background-color', '#FFF');
         btn.style('border', '2px solid #000');
         btn.mousePressed(() => selectSpeed(i));
         speedButtons.push(btn);
-        btn.parent(speedButtonsDiv);
     }
 
-    // Create Start Game Button
+    // Create Start Button
     startButton = createButton('Start Game');
+    startButton.position(canvas_x + (width / 2 - 100), 300 + canvas_y); // Centered horizontally, y=300px
     startButton.size(200, 60);
     startButton.style('font-size', '24px');
     startButton.style('background-color', '#FFF');
     startButton.style('border', '2px solid #000');
     startButton.mousePressed(() => startGame());
-    startButton.parent(welcomeDiv);
-    startButton.style('margin-top', '40px'); // Space above start button
 }
 
 function selectSpeed(speed) {
@@ -176,7 +168,7 @@ function selectSpeed(speed) {
     frameRate(FPS_VALUES[selected_speed]);
     // Highlight selected button
     speedButtons.forEach((btn, index) => {
-        if (index + 1 === speed) {
+        if (index +1 === speed) {
             btn.style('background-color', '#AAF'); // Highlight color
         } else {
             btn.style('background-color', '#FFF'); // Default color
@@ -187,7 +179,11 @@ function selectSpeed(speed) {
 function startGame() {
     game_state = 'RUNNING';
     // Hide welcome screen elements
-    welcomeDiv.hide();
+    titleElement.hide();
+    subtitleElement.hide();
+    speedLabelElement.hide();
+    speedButtons.forEach(btn => btn.hide());
+    startButton.hide();
 }
 
 function initSnake() {
@@ -204,7 +200,7 @@ function generateMathProblem() {
     let operation = random(operations);
     let a, b, question, answer;
 
-    switch (operation) {
+    switch(operation) {
         case '+':
             a = floor(random(0, 51));
             b = floor(random(0, 51 - a));
@@ -234,7 +230,7 @@ function generateMathProblem() {
     return {question, answer};
 }
 
-function generateIncorrectAnswers(correct_answer, count = 3) {
+function generateIncorrectAnswers(correct_answer, count=3) {
     let incorrect = new Set();
     while (incorrect.size < count) {
         let delta = floor(random(-10, 11));
@@ -280,18 +276,18 @@ function initFood() {
 
 function moveSnake() {
     let head = Object.assign({}, snake[0]);
-    switch (direction) {
+    switch(direction) {
         case 'UP':
-            head.y -= 1;
+            head.y -=1;
             break;
         case 'DOWN':
-            head.y += 1;
+            head.y +=1;
             break;
         case 'LEFT':
-            head.x -= 1;
+            head.x -=1;
             break;
         case 'RIGHT':
-            head.x += 1;
+            head.x +=1;
             break;
     }
     // Wrap around the grid
@@ -308,10 +304,10 @@ function handleCollisions() {
         if (head.x === item.x && head.y === item.y) {
             if (item.is_correct) {
                 // Correct Answer
-                snake.push(Object.assign({}, snake[snake.length - 1]));
-                score_correct += 1;
-                score_total += 1;
-                lives += 1;
+                snake.push(Object.assign({}, snake[snake.length -1]));
+                score_correct +=1;
+                score_total +=1;
+                lives +=1;
                 emitConfetti((head.x + 0.5) * CELL_SIZE, (head.y + 0.5) * CELL_SIZE + 100);
                 emitCheckMark((head.x + 0.5) * CELL_SIZE, (head.y + 0.5) * CELL_SIZE + 100);
                 // Generate new problem
@@ -321,17 +317,17 @@ function handleCollisions() {
                 if (snake.length > 1) {
                     snake.pop(); // Shrink Snake
                 }
-                score_total += 1;
-                lives -= 1;
+                score_total +=1;
+                lives -=1;
                 emitXMark((item.x + 0.5) * CELL_SIZE, (item.y + 0.5) * CELL_SIZE + 100);
                 // Remove incorrect food
-                food.splice(i, 1);
+                food.splice(i,1);
             }
             break;
         }
     }
 
-    if (lives <= 0) {
+    if (lives <=0) {
         game_state = 'GAME_OVER';
     }
 }
@@ -365,25 +361,25 @@ function drawGrid() {
 }
 
 function drawSnake() {
-    for (let i = 0; i < snake.length; i++) {
+    for (let i =0; i < snake.length; i++) {
         let segment = snake[i];
-        let seg_x = segment.x * CELL_SIZE + CELL_SIZE / 4;
-        let seg_y = segment.y * CELL_SIZE + 100 + CELL_SIZE / 4;
+        let seg_x = segment.x * CELL_SIZE + CELL_SIZE/4;
+        let seg_y = segment.y * CELL_SIZE + 100 + CELL_SIZE/4;
         fill(SNAKE_COLOR);
         noStroke();
-        rect(seg_x, seg_y, CELL_SIZE / 2, CELL_SIZE / 2);
-        if (i === 0) {
+        rect(seg_x, seg_y, CELL_SIZE/2, CELL_SIZE/2);
+        if (i ===0) {
             // Draw smiley face on the head
             fill(0);
-            ellipse(seg_x + CELL_SIZE / 4, seg_y + CELL_SIZE / 4, CELL_SIZE / 8, CELL_SIZE / 8); // Head
+            ellipse(seg_x + CELL_SIZE/4, seg_y + CELL_SIZE/4, CELL_SIZE/8, CELL_SIZE/8); // Head
             // Eyes
-            ellipse(seg_x + CELL_SIZE / 4 - CELL_SIZE / 16, seg_y + CELL_SIZE / 4 - CELL_SIZE / 16, CELL_SIZE / 32, CELL_SIZE / 32);
-            ellipse(seg_x + CELL_SIZE / 4 + CELL_SIZE / 16, seg_y + CELL_SIZE / 4 - CELL_SIZE / 16, CELL_SIZE / 32, CELL_SIZE / 32);
+            ellipse(seg_x + CELL_SIZE/4 - CELL_SIZE/16, seg_y + CELL_SIZE/4 - CELL_SIZE/16, CELL_SIZE/32, CELL_SIZE/32);
+            ellipse(seg_x + CELL_SIZE/4 + CELL_SIZE/16, seg_y + CELL_SIZE/4 - CELL_SIZE/16, CELL_SIZE/32, CELL_SIZE/32);
             // Mouth
             noFill();
             stroke(0);
             strokeWeight(1);
-            arc(seg_x + CELL_SIZE / 4, seg_y + CELL_SIZE / 4 + CELL_SIZE / 32, CELL_SIZE / 8, CELL_SIZE / 8, 0, PI);
+            arc(seg_x + CELL_SIZE/4, seg_y + CELL_SIZE/4 + CELL_SIZE/32, CELL_SIZE/8, CELL_SIZE/8, 0, PI);
         }
     }
 }
@@ -397,14 +393,14 @@ function drawFoodItems() {
         noStroke();
         textSize(24);
         textAlign(CENTER, CENTER);
-        text(item.value, (item.x + 0.5) * CELL_SIZE, (item.y + 0.5) * CELL_SIZE + 100);
+        text(item.value, (item.x +0.5)*CELL_SIZE, (item.y +0.5)*CELL_SIZE + 100);
     }
 }
 
 function emitConfetti(x, y) {
-    for (let i = 0; i < 30; i++) { // Reduced number for performance
+    for (let i=0; i <30; i++) { // Reduced number for performance
         let angle = random(TWO_PI);
-        let speed = random(1, 3);
+        let speed = random(1,3);
         confetti_particles.push({
             x: x,
             y: y,
@@ -425,16 +421,16 @@ function emitXMark(x, y) {
 }
 
 function emitConfettiParticles() {
-    for (let i = confetti_particles.length - 1; i >= 0; i--) {
+    for (let i = confetti_particles.length -1; i >=0; i--) {
         let particle = confetti_particles[i];
         fill(particle.color);
         noStroke();
-        ellipse(particle.x, particle.y, 5, 5);
+        ellipse(particle.x, particle.y, 5,5);
         particle.x += particle.vx;
         particle.y += particle.vy;
-        particle.lifetime -= 1;
-        if (particle.lifetime <= 0) {
-            confetti_particles.splice(i, 1);
+        particle.lifetime -=1;
+        if (particle.lifetime <=0) {
+            confetti_particles.splice(i,1);
         }
     }
 }
@@ -444,33 +440,33 @@ function drawConfettiParticles() {
 }
 
 function drawXMarks() {
-    for (let i = x_marks.length - 1; i >= 0; i--) {
+    for (let i = x_marks.length -1; i >=0; i--) {
         let mark = x_marks[i];
         stroke(X_COLOR);
         strokeWeight(3);
-        line(mark.x - 10, mark.y - 10, mark.x + 10, mark.y + 10);
-        line(mark.x - 10, mark.y + 10, mark.x + 10, mark.y - 10);
-        mark.lifetime -= 1;
-        if (mark.lifetime <= 0) {
-            x_marks.splice(i, 1);
+        line(mark.x -10, mark.y -10, mark.x +10, mark.y +10);
+        line(mark.x -10, mark.y +10, mark.x +10, mark.y -10);
+        mark.lifetime -=1;
+        if (mark.lifetime <=0) {
+            x_marks.splice(i,1);
         }
     }
 }
 
 function drawCheckMarks() {
-    for (let i = check_marks.length - 1; i >= 0; i--) {
+    for (let i = check_marks.length -1; i >=0; i--) {
         let mark = check_marks[i];
         stroke(CHECK_COLOR);
         strokeWeight(3);
         noFill();
         beginShape();
-        vertex(mark.x - 10, mark.y);
-        vertex(mark.x - 3, mark.y + 10);
-        vertex(mark.x + 10, mark.y - 5);
+        vertex(mark.x -10, mark.y);
+        vertex(mark.x -3, mark.y +10);
+        vertex(mark.x +10, mark.y -5);
         endShape();
-        mark.lifetime -= 1;
-        if (mark.lifetime <= 0) {
-            check_marks.splice(i, 1);
+        mark.lifetime -=1;
+        if (mark.lifetime <=0) {
+            check_marks.splice(i,1);
         }
     }
 }
@@ -478,28 +474,28 @@ function drawCheckMarks() {
 function drawPauseMenu() {
     fill('rgba(0,0,0,0.5)');
     noStroke();
-    rect(0, 0, width, height);
+    rect(0,0,width,height);
 
     fill(TEXT_COLOR);
     textSize(24);
     textAlign(CENTER, CENTER);
-    text("Game Paused", width / 2, height / 2 - 50);
-    text("Press 'C' to Continue or 'R' to Restart.", width / 2, height / 2);
+    text("Game Paused", width/2, height/2 - 50);
+    text("Press 'C' to Continue or 'R' to Restart.", width/2, height/2);
 }
 
 function drawGameOver() {
     fill('rgba(0,0,0,0.7)');
     noStroke();
-    rect(0, 0, width, height);
+    rect(0,0,width,height);
 
     fill(TEXT_COLOR);
     textSize(40);
     textAlign(CENTER, CENTER);
-    text("Game Over!", width / 2, height / 2 - 100);
+    text("Game Over!", width/2, height/2 - 100);
 
     textSize(24);
-    text(`Final Score: ${score_correct}/${score_total}`, width / 2, height / 2 - 50);
-    text("Press 'R' to Restart or 'Q' to Quit.", width / 2, height / 2);
+    text(`Final Score: ${score_correct}/${score_total}`, width/2, height/2 - 50);
+    text("Press 'R' to Restart or 'Q' to Quit.", width/2, height/2);
 }
 
 function resetGame() {
@@ -515,3 +511,31 @@ function resetGame() {
     confetti_particles = [];
 }
 
+function windowResized() {
+    // Recenter the canvas
+    canvas_x = (windowWidth - width) / 2;
+    canvas_y = (windowHeight - height) / 2;
+    canvas.position(canvas_x, canvas_y);
+
+    if (game_state === 'WELCOME') {
+        // Reposition Title
+        titleElement.position(canvas_x + width / 2 - titleElement.elt.offsetWidth / 2, 80 + canvas_y);
+
+        // Reposition Subtitle
+        subtitleElement.position(canvas_x + width / 2 - subtitleElement.elt.offsetWidth / 2, 130 + canvas_y);
+
+        // Reposition Game Speed Label
+        speedLabelElement.position(canvas_x + width / 2 - speedLabelElement.elt.offsetWidth / 2, 180 + canvas_y);
+
+        // Reposition Speed Buttons
+        let total_buttons_width = 5 * 60 + 4 * 20; // 380px
+        let start_x = (width - total_buttons_width) / 2; // 330px
+        for (let i = 0; i < speedButtons.length; i++) {
+            let btn = speedButtons[i];
+            btn.position(canvas_x + start_x + (i)*80, 220 + canvas_y);
+        }
+
+        // Reposition Start Button
+        startButton.position(canvas_x + (width / 2 - 100), 300 + canvas_y);
+    }
+}
