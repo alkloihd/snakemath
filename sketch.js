@@ -1,7 +1,7 @@
 // Game Constants
 const CELL_SIZE = 40;
-const GRID_WIDTH = 15;  // 600 / 40
-const GRID_HEIGHT = 20; // (900 - 100) / 40
+const GRID_WIDTH = 15;  // 800 / 40
+const GRID_HEIGHT = 20; // (700 - 100) / 40
 const BG_COLOR = '#32A852';
 const TOP_PANEL_COLOR = '#228B22';
 const FOOD_COLOR = '#C8C8C8';
