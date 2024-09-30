@@ -107,14 +107,14 @@ function keyPressed() {
 
 // Function to create Welcome Screen Buttons
 function createWelcomeScreen() {
-    // Create Speed Selection Buttons
     // Calculate total width: 5 buttons * 60 + 4 gaps * 20 = 300 + 80 = 380
     let total_buttons_width = 5 * 60 + 4 * 20;
-    let start_x = (width - total_buttons_width) / 2; // Center the buttons
+    let start_x = (width - total_buttons_width) / 2; // Center the buttons horizontally
 
+    // Create Speed Selection Buttons
     for (let i = 1; i <=5; i++) {
         let btn = createButton(i.toString());
-        btn.position(start_x + (i-1)*80, height / 2 - 50);
+        btn.position(start_x + (i-1)*80, 180); // y-position set to 180px
         btn.size(60, 60);
         btn.style('font-size', '20px');
         btn.style('background-color', '#FFF');
@@ -125,7 +125,7 @@ function createWelcomeScreen() {
 
     // Create Start Button
     startButton = createButton('Start Game');
-    startButton.position(width / 2 - 100, height / 2 + 50);
+    startButton.position(width / 2 - 100, 250); // Centered horizontally, y-position set to 250px
     startButton.size(200, 60);
     startButton.style('font-size', '24px');
     startButton.style('background-color', '#FFF');
@@ -443,12 +443,12 @@ function drawWelcomeScreen() {
     fill(TEXT_COLOR);
     textSize(32);
     textAlign(CENTER, CENTER);
-    text(title, width / 2, height / 2 - 180);
+    text(title, width / 2, 80); // y-position set to 80px
 
     // Draw Subtitle
     textSize(20);
-    text(subtitle, width / 2, height / 2 - 80);
-    
+    text(subtitle, width / 2, 130); // y-position set to 130px
+
     // Buttons are already created and positioned
 }
 
