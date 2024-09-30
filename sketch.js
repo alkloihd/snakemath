@@ -51,6 +51,10 @@ function draw() {
         textSize(36);
         textAlign(CENTER, CENTER);
         text("Math Snake by M. Lodhia", width / 2, 50);
+        fill(TEXT_COLOR);
+        textSize(36);
+        textAlign(CENTER, CENTER);
+        text("use the arrow keys to play", width / 4, 40);
         // Welcome screen is handled by DOM buttons
         return;
     }
