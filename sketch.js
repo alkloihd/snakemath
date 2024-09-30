@@ -1,7 +1,7 @@
 // Game Constants
 const CELL_SIZE = 40;
-const GRID_WIDTH = 15;  // 800 / 40
-const GRID_HEIGHT = 20; // (700 - 100) / 40
+const GRID_WIDTH = 20;  // 800 / 40
+const GRID_HEIGHT = 15; // 600 / 40
 const BG_COLOR = '#32A852';
 const TOP_PANEL_COLOR = '#228B22';
 const FOOD_COLOR = '#C8C8C8';
@@ -24,15 +24,27 @@ let confetti_particles = [];
 let game_state = 'WELCOME'; // WELCOME, RUNNING, PAUSED, GAME_OVER
 let selected_speed = 3; // Default speed
 
+// Buttons
+let speedButtons = [];
+let startButton;
+
 function setup() {
     createCanvas(CELL_SIZE * GRID_WIDTH, CELL_SIZE * GRID_HEIGHT + 100);
     frameRate(FPS_VALUES[selected_speed]);
+    textFont('Arial');
     initSnake();
     initFood();
+    createWelcomeScreen();
 }
 
 function draw() {
     background(BG_COLOR);
+
+    if (game_state === 'WELCOME') {
+        // Welcome screen is handled by DOM buttons
+        return;
+    }
+
     drawTopPanel();
     drawGrid();
 
@@ -56,16 +68,6 @@ function draw() {
 }
 
 function keyPressed() {
-    if (game_state === 'WELCOME') {
-        if (key >= '1' && key <= '5') {
-            selected_speed = parseInt(key);
-            frameRate(FPS_VALUES[selected_speed]);
-        }
-        if (keyCode === ENTER) {
-            game_state = 'RUNNING';
-        }
-    }
-
     if (game_state === 'RUNNING') {
         if (keyCode === UP_ARROW && direction !== 'DOWN') {
             direction = 'UP';
@@ -92,38 +94,54 @@ function keyPressed() {
         if (key === 'R' || key === 'r') {
             resetGame();
         } else if (key === 'Q' || key === 'q') {
-            noLoop(); // Stop the draw loop
-            // Optionally, you can provide a message or reload the page
+            // Reload the page to restart
             window.location.reload();
         }
     }
 }
 
-function mousePressed() {
-    if (game_state === 'WELCOME') {
-        // Define button areas for speed selection and start game
-        // Speed Buttons: x from (cell_size*5) to (cell_size*10), y = height/2 - 50
-        for (let i = 1; i <=5; i++) {
-            let btn_x = (width / 2 - 200) + (i-1)*80;
-            let btn_y = height / 2 - 50;
-            let btn_w = 60;
-            let btn_h = 60;
-            if (mouseX >= btn_x && mouseX <= btn_x + btn_w &&
-                mouseY >= btn_y && mouseY <= btn_y + btn_h) {
-                selected_speed = i;
-                frameRate(FPS_VALUES[selected_speed]);
-            }
-        }
-        // Start Button
-        let start_x = width / 2 - 100;
-        let start_y = height / 2 + 50;
-        let start_w = 200;
-        let start_h = 60;
-        if (mouseX >= start_x && mouseX <= start_x + start_w &&
-            mouseY >= start_y && mouseY <= start_y + start_h) {
-            game_state = 'RUNNING';
-        }
+// Function to create Welcome Screen Buttons
+function createWelcomeScreen() {
+    // Create Speed Selection Buttons
+    for (let i = 1; i <=5; i++) {
+        let btn = createButton(i.toString());
+        btn.position((width / 2 - 200) + (i-1)*80, height / 2 - 50);
+        btn.size(60, 60);
+        btn.style('font-size', '20px');
+        btn.style('background-color', '#FFF');
+        btn.style('border', '2px solid #000');
+        btn.mousePressed(() => selectSpeed(i));
+        speedButtons.push(btn);
     }
+
+    // Create Start Button
+    startButton = createButton('Start Game');
+    startButton.position(width / 2 - 100, height / 2 + 50);
+    startButton.size(200, 60);
+    startButton.style('font-size', '24px');
+    startButton.style('background-color', '#FFF');
+    startButton.style('border', '2px solid #000');
+    startButton.mousePressed(() => startGame());
+}
+
+function selectSpeed(speed) {
+    selected_speed = speed;
+    frameRate(FPS_VALUES[selected_speed]);
+    // Highlight selected button
+    speedButtons.forEach((btn, index) => {
+        if (index +1 === speed) {
+            btn.style('background-color', '#AAF');
+        } else {
+            btn.style('background-color', '#FFF');
+        }
+    });
+}
+
+function startGame() {
+    game_state = 'RUNNING';
+    // Hide buttons
+    speedButtons.forEach(btn => btn.hide());
+    startButton.hide();
 }
 
 function initSnake() {
@@ -291,6 +309,7 @@ function drawTopPanel() {
 
 function drawGrid() {
     stroke(0);
+    strokeWeight(1); // Ensure grid lines are not bold
     for (let x = 0; x <= width; x += CELL_SIZE) {
         line(x, 100, x, height);
     }
@@ -416,7 +435,7 @@ function drawPauseMenu() {
     rect(0,0,width,height);
 
     fill(TEXT_COLOR);
-    textSize(20);
+    textSize(24);
     textAlign(CENTER, CENTER);
     text("Game Paused", width/2, height/2 - 50);
     text("Press 'C' to Continue or 'R' to Restart.", width/2, height/2);
