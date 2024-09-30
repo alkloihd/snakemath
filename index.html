@@ -10,22 +10,23 @@
             background-color: #32A852; /* Dark green background */
             margin: 0;
             padding: 0;
-            position: relative; /* To allow absolute positioning of welcomeDiv */
-            height: 100vh; /* Ensure body takes full viewport height */
-            overflow: hidden; /* Prevent scrolling */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh; /* Full viewport height */
+        }
+        #game-container {
+            position: relative;
         }
         #defaultCanvas0 {
-            display: block;
-            margin: 0 auto; /* Center canvas horizontally */
-            border: 2px solid #000;
-            position: absolute;
-            top: 0;
-            left: 0;
+            border: 2px solid #000; /* Black border around canvas */
         }
     </style>
 </head>
 <body>
-    <!-- Game will be rendered here by p5.js -->
+    <div id="game-container">
+        <!-- p5.js canvas and Welcome Screen will be inside this container -->
+    </div>
     <script src="sketch.js"></script>
 </body>
 </html>
