@@ -1,8 +1,7 @@
 // Game Constants
 const CELL_SIZE = 40;
-const GRID_WIDTH = 26;  // Increased by 6 (3 on each side)
-const GRID_HEIGHT = 17; // Increased by 2
-const TOP_PANEL_HEIGHT = 100;
+const GRID_WIDTH = 26;  // Original 20 + 6 additional boxes
+const GRID_HEIGHT = 17; // Original 15 + 2 additional boxes
 const BG_COLOR = '#32A852';
 const TOP_PANEL_COLOR = '#228B22';
 const FOOD_COLOR = '#C8C8C8';
@@ -11,9 +10,6 @@ const TEXT_COLOR = '#FFFFFF';
 const X_COLOR = '#FF0000';
 const CHECK_COLOR = '#00FF00';
 const FPS_VALUES = {1:5, 2:6, 3:7, 4:8, 5:9}; // Speed selection mapping
-
-const CANVAS_WIDTH = CELL_SIZE * GRID_WIDTH; // 40 * 26 = 1040
-const CANVAS_HEIGHT = CELL_SIZE * GRID_HEIGHT + TOP_PANEL_HEIGHT; // 40 * 17 + 100 = 780
 
 let snake = [];
 let direction = 'RIGHT';
@@ -39,49 +35,14 @@ let subtitle = "Use arrow keys to play and press Esc to pause";
 // Game Speed Label
 let speedLabel = "Game Speed";
 
-let canvas;
-
 function setup() {
-    canvas = createCanvas(CANVAS_WIDTH, CANVAS_HEIGHT);
-    centerCanvas();
+    let canvas = createCanvas(CELL_SIZE * GRID_WIDTH, CELL_SIZE * GRID_HEIGHT + 100); // 1040x780
+    canvas.parent('game-container');
     frameRate(FPS_VALUES[selected_speed]);
     textFont('Arial');
     initSnake();
     initFood();
     createWelcomeScreen();
-}
-
-function windowResized() {
-    centerCanvas();
-}
-
-function centerCanvas() {
-    let x = (windowWidth - width) / 2;
-    let y = (windowHeight - height) / 2;
-    canvas.position(x, y);
-    positionButtons();
-}
-
-function positionButtons() {
-    // Position buttons relative to the canvas position
-    // Calculate total width: 5 buttons * 60 + 4 gaps * 20 = 300 + 80 = 380
-    let total_buttons_width = 5 * 60 + 4 * 20;
-    let start_x = (width - total_buttons_width) / 2;
-    let canvasX = (windowWidth - width) / 2;
-    let canvasY = (windowHeight - height) / 2;
-
-    // Position the speed buttons
-    for (let i = 0; i < speedButtons.length; i++) {
-        let btn = speedButtons[i];
-        let x = canvasX + start_x + i * 80;
-        let y = canvasY + 220; // Adjust Y position as needed
-        btn.position(x, y);
-    }
-
-    // Position the Start Game button
-    let startButtonX = canvasX + width / 2 - 100;
-    let startButtonY = canvasY + 300; // Adjust Y position as needed
-    startButton.position(startButtonX, startButtonY);
 }
 
 function draw() {
@@ -149,9 +110,17 @@ function keyPressed() {
 
 // Function to create Welcome Screen Buttons
 function createWelcomeScreen() {
+    // Create Game Speed Label
+    // Note: We'll draw this on the canvas in drawWelcomeScreen()
+
     // Create Speed Selection Buttons
+    // Total width: 5 buttons *60 + 4 gaps *20 = 300 + 80 = 380
+    let total_buttons_width = 5 * 60 + 4 * 20;
+    let start_x = (width - total_buttons_width) / 2; // 1040 -380=660/2=330
+
     for (let i = 1; i <=5; i++) {
         let btn = createButton(i.toString());
+        btn.position(start_x + (i-1)*80, 220); // y=220px, x=330,410,...,650px
         btn.size(60, 60);
         btn.style('font-size', '20px');
         btn.style('background-color', '#FFF');
@@ -162,13 +131,12 @@ function createWelcomeScreen() {
 
     // Create Start Button
     startButton = createButton('Start Game');
+    startButton.position(width / 2 - 100, 300); // x=420px, y=300px
     startButton.size(200, 60);
     startButton.style('font-size', '24px');
     startButton.style('background-color', '#FFF');
     startButton.style('border', '2px solid #000');
     startButton.mousePressed(() => startGame());
-
-    positionButtons();
 }
 
 function selectSpeed(speed) {
@@ -313,8 +281,8 @@ function handleCollisions() {
                 score_correct +=1;
                 score_total +=1;
                 lives +=1;
-                emitConfetti((head.x + 0.5) * CELL_SIZE, (head.y + 0.5) * CELL_SIZE + TOP_PANEL_HEIGHT);
-                emitCheckMark((head.x + 0.5) * CELL_SIZE, (head.y + 0.5) * CELL_SIZE + TOP_PANEL_HEIGHT);
+                emitConfetti((head.x + 0.5) * CELL_SIZE, (head.y + 0.5) * CELL_SIZE + 100);
+                emitCheckMark((head.x + 0.5) * CELL_SIZE, (head.y + 0.5) * CELL_SIZE + 100);
                 // Generate new problem
                 generateFood();
             } else {
@@ -324,7 +292,7 @@ function handleCollisions() {
                 }
                 score_total +=1;
                 lives -=1;
-                emitXMark((item.x + 0.5) * CELL_SIZE, (item.y + 0.5) * CELL_SIZE + TOP_PANEL_HEIGHT);
+                emitXMark((item.x + 0.5) * CELL_SIZE, (item.y + 0.5) * CELL_SIZE + 100);
                 // Remove incorrect food
                 food.splice(i,1);
             }
@@ -340,7 +308,7 @@ function handleCollisions() {
 function drawTopPanel() {
     fill(TOP_PANEL_COLOR);
     noStroke();
-    rect(0, 0, width, TOP_PANEL_HEIGHT);
+    rect(0, 0, width, 100);
 
     // Draw Math Problem
     fill(TEXT_COLOR);
@@ -358,9 +326,9 @@ function drawGrid() {
     stroke(0);
     strokeWeight(1); // Ensure grid lines are not bold
     for (let x = 0; x <= width; x += CELL_SIZE) {
-        line(x, TOP_PANEL_HEIGHT, x, height);
+        line(x, 100, x, height);
     }
-    for (let y = TOP_PANEL_HEIGHT; y <= height; y += CELL_SIZE) {
+    for (let y = 100; y <= height; y += CELL_SIZE) {
         line(0, y, width, y);
     }
 }
@@ -369,7 +337,7 @@ function drawSnake() {
     for (let i =0; i < snake.length; i++) {
         let segment = snake[i];
         let seg_x = segment.x * CELL_SIZE + CELL_SIZE/4;
-        let seg_y = segment.y * CELL_SIZE + TOP_PANEL_HEIGHT + CELL_SIZE/4;
+        let seg_y = segment.y * CELL_SIZE + 100 + CELL_SIZE/4;
         fill(SNAKE_COLOR);
         noStroke();
         rect(seg_x, seg_y, CELL_SIZE/2, CELL_SIZE/2);
@@ -393,12 +361,12 @@ function drawFoodItems() {
     for (let item of food) {
         fill(FOOD_COLOR);
         stroke(0);
-        rect(item.x * CELL_SIZE, item.y * CELL_SIZE + TOP_PANEL_HEIGHT, CELL_SIZE, CELL_SIZE);
+        rect(item.x * CELL_SIZE, item.y * CELL_SIZE + 100, CELL_SIZE, CELL_SIZE);
         fill(TEXT_COLOR);
         noStroke();
         textSize(24);
         textAlign(CENTER, CENTER);
-        text(item.value, (item.x +0.5)*CELL_SIZE, (item.y +0.5)*CELL_SIZE + TOP_PANEL_HEIGHT);
+        text(item.value, (item.x +0.5)*CELL_SIZE, (item.y +0.5)*CELL_SIZE + 100);
     }
 }
 
