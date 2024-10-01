@@ -24,10 +24,6 @@ let confetti_particles = [];
 let game_state = 'WELCOME'; // WELCOME, RUNNING, PAUSED, GAME_OVER
 let selected_speed = 3; // Default speed
 
-// Buttons
-let speedButtons = [];
-let startButton;
-
 // Title and Subtitle
 let title = "Math Snake by M. Lodhia";
 let subtitle = "Use arrow keys to play and press Esc to pause";
@@ -35,31 +31,33 @@ let subtitle = "Use arrow keys to play and press Esc to pause";
 // Game Speed Label
 let speedLabel = "Game Speed";
 
+// HTML Elements
+let welcomeScreen;
+let startButton;
+let speedButtons;
+
 function setup() {
     // Adjusted Canvas Size: 800x700 (800 width, 600 game area + 100 top panel)
-    createCanvas(CELL_SIZE * GRID_WIDTH, CELL_SIZE * GRID_HEIGHT + 100);
+    let canvas = createCanvas(CELL_SIZE * GRID_WIDTH, CELL_SIZE * GRID_HEIGHT + 100);
+    canvas.parent('game-container'); // Append canvas to a container if needed
     frameRate(FPS_VALUES[selected_speed]);
     textFont('Arial');
     initSnake();
     initFood();
-    createWelcomeScreen();
 }
 
 function draw() {
-    background(BG_COLOR);
-
-    if (game_state === 'WELCOME') {
-        drawWelcomeScreen();
-        return; // Skip other drawing
+    if (game_state !== 'RUNNING') {
+        return; // Skip drawing when not running
     }
+
+    background(BG_COLOR);
 
     drawTopPanel();
     drawGrid();
 
-    if (game_state === 'RUNNING') {
-        moveSnake();
-        handleCollisions();
-    }
+    moveSnake();
+    handleCollisions();
 
     drawSnake();
     drawFoodItems();
@@ -108,54 +106,37 @@ function keyPressed() {
     }
 }
 
-// Function to create Welcome Screen Buttons
-function createWelcomeScreen() {
-    // Calculate total width: 5 buttons * 60 + 4 gaps * 20 = 300 + 80 = 380
-    let total_buttons_width = 5 * 60 + 4 * 20;
-    let start_x = (width - total_buttons_width) / 2; // Center the buttons horizontally
+// Initialize HTML Elements after DOM is loaded
+window.addEventListener('DOMContentLoaded', () => {
+    // Welcome Screen Elements
+    welcomeScreen = document.getElementById('welcome-screen');
+    startButton = document.getElementById('start-button');
+    speedButtons = document.querySelectorAll('.speed-btn');
 
-    // Create Speed Selection Buttons
-    for (let i = 1; i <=5; i++) {
-        let btn = createButton(i.toString());
-        btn.position(start_x + (i-1)*80, 220); // y-position set to 220px
-        btn.size(60, 60);
-        btn.style('font-size', '20px');
-        btn.style('background-color', '#FFF');
-        btn.style('border', '2px solid #000');
-        btn.mousePressed(() => selectSpeed(i));
-        speedButtons.push(btn);
-    }
-
-    // Create Start Button
-    startButton = createButton('Start Game');
-    startButton.position(width / 2 - 100, 300); // Centered horizontally, y-position set to 300px
-    startButton.size(200, 60);
-    startButton.style('font-size', '24px');
-    startButton.style('background-color', '#FFF');
-    startButton.style('border', '2px solid #000');
-    startButton.mousePressed(() => startGame());
-}
-
-function selectSpeed(speed) {
-    selected_speed = speed;
-    frameRate(FPS_VALUES[selected_speed]);
-    // Highlight selected button
-    speedButtons.forEach((btn, index) => {
-        if (index +1 === speed) {
-            btn.style('background-color', '#AAF'); // Highlight color
-        } else {
-            btn.style('background-color', '#FFF'); // Default color
-        }
+    // Add Event Listeners to Speed Buttons
+    speedButtons.forEach(button => {
+        button.addEventListener('click', () => {
+            // Remove 'active' class from all buttons
+            speedButtons.forEach(btn => btn.classList.remove('active'));
+            // Add 'active' class to the clicked button
+            button.classList.add('active');
+            // Update selected speed
+            selected_speed = parseInt(button.getAttribute('data-speed'));
+            frameRate(FPS_VALUES[selected_speed]);
+        });
     });
-}
 
-function startGame() {
-    game_state = 'RUNNING';
-    // Hide buttons
-    speedButtons.forEach(btn => btn.hide());
-    startButton.hide();
-}
+    // Set default active speed
+    document.getElementById('default-speed').classList.add('active');
 
+    // Start Button Event Listener
+    startButton.addEventListener('click', () => {
+        welcomeScreen.style.display = 'none';
+        game_state = 'RUNNING';
+    });
+});
+
+// Function to initialize the snake
 function initSnake() {
     snake = [];
     let center_x = floor(GRID_WIDTH / 2);
@@ -165,6 +146,7 @@ function initSnake() {
     }
 }
 
+// Function to generate a math problem
 function generateMathProblem() {
     let operations = ['+', '-', '*', '/'];
     let operation = random(operations);
@@ -200,6 +182,7 @@ function generateMathProblem() {
     return {question, answer};
 }
 
+// Function to generate incorrect answers
 function generateIncorrectAnswers(correct_answer, count=3) {
     let incorrect = new Set();
     while (incorrect.size < count) {
@@ -212,6 +195,7 @@ function generateIncorrectAnswers(correct_answer, count=3) {
     return Array.from(incorrect);
 }
 
+// Function to generate food items based on math problems
 function generateFood() {
     current_problem = generateMathProblem();
     let correct_answer = current_problem.answer;
@@ -239,11 +223,13 @@ function generateFood() {
     });
 }
 
+// Initialize food items
 function initFood() {
     food = [];
     generateFood();
 }
 
+// Function to move the snake
 function moveSnake() {
     let head = Object.assign({}, snake[0]);
     switch(direction) {
@@ -267,6 +253,7 @@ function moveSnake() {
     snake.pop();
 }
 
+// Function to handle collisions
 function handleCollisions() {
     let head = snake[0];
     for (let i = 0; i < food.length; i++) {
@@ -302,6 +289,7 @@ function handleCollisions() {
     }
 }
 
+// Function to draw the top panel
 function drawTopPanel() {
     fill(TOP_PANEL_COLOR);
     noStroke();
@@ -319,6 +307,7 @@ function drawTopPanel() {
     text(`Score: ${score_correct}/${score_total}    Lives: ${lives}`, width - 20, 20);
 }
 
+// Function to draw the grid
 function drawGrid() {
     stroke(0);
     strokeWeight(1); // Ensure grid lines are not bold
@@ -330,6 +319,7 @@ function drawGrid() {
     }
 }
 
+// Function to draw the snake
 function drawSnake() {
     for (let i =0; i < snake.length; i++) {
         let segment = snake[i];
@@ -354,6 +344,7 @@ function drawSnake() {
     }
 }
 
+// Function to draw food items
 function drawFoodItems() {
     for (let item of food) {
         fill(FOOD_COLOR);
@@ -367,6 +358,7 @@ function drawFoodItems() {
     }
 }
 
+// Function to emit confetti particles
 function emitConfetti(x, y) {
     for (let i=0; i <30; i++) { // Reduced number for performance
         let angle = random(TWO_PI);
@@ -382,14 +374,17 @@ function emitConfetti(x, y) {
     }
 }
 
+// Function to emit check marks
 function emitCheckMark(x, y) {
     check_marks.push({x: x, y: y, lifetime: 30});
 }
 
+// Function to emit X marks
 function emitXMark(x, y) {
     x_marks.push({x: x, y: y, lifetime: 30});
 }
 
+// Function to update and draw confetti particles
 function emitConfettiParticles() {
     for (let i = confetti_particles.length -1; i >=0; i--) {
         let particle = confetti_particles[i];
@@ -405,10 +400,12 @@ function emitConfettiParticles() {
     }
 }
 
+// Function to draw confetti particles
 function drawConfettiParticles() {
     emitConfettiParticles();
 }
 
+// Function to draw X marks
 function drawXMarks() {
     for (let i = x_marks.length -1; i >=0; i--) {
         let mark = x_marks[i];
@@ -423,6 +420,7 @@ function drawXMarks() {
     }
 }
 
+// Function to draw check marks
 function drawCheckMarks() {
     for (let i = check_marks.length -1; i >=0; i--) {
         let mark = check_marks[i];
@@ -441,24 +439,12 @@ function drawCheckMarks() {
     }
 }
 
-function drawWelcomeScreen() {
-    // Draw Title
-    fill(TEXT_COLOR);
-    textSize(32);
-    textAlign(CENTER, CENTER);
-    text(title, width / 2, 80); // y-position set to 80px
+// Function to draw the welcome screen (No longer needed as it's handled by HTML/CSS)
+// function drawWelcomeScreen() {
+//     // Removed as welcome screen is now handled by HTML/CSS
+// }
 
-    // Draw Subtitle
-    textSize(20);
-    text(subtitle, width / 2, 130); // y-position set to 130px
-
-    // Draw Game Speed Label
-    textSize(24);
-    text(speedLabel, width / 2, 180); // y-position set to 180px
-
-    // Buttons are already created and positioned
-}
-
+// Function to draw the pause menu
 function drawPauseMenu() {
     fill('rgba(0,0,0,0.5)');
     noStroke();
@@ -471,6 +457,7 @@ function drawPauseMenu() {
     text("Press 'C' to Continue or 'R' to Restart.", width/2, height/2);
 }
 
+// Function to draw the game over screen
 function drawGameOver() {
     fill('rgba(0,0,0,0.7)');
     noStroke();
@@ -486,6 +473,7 @@ function drawGameOver() {
     text("Press 'R' to Restart or 'Q' to Quit.", width/2, height/2);
 }
 
+// Function to reset the game
 function resetGame() {
     initSnake();
     initFood();
@@ -497,4 +485,16 @@ function resetGame() {
     x_marks = [];
     check_marks = [];
     confetti_particles = [];
+}
+
+// Function to shuffle an array (Fisher-Yates Shuffle)
+function shuffle(array, bool=false) {
+    let m = array.length, t, i;
+    while (m) {
+        i = Math.floor(random(0, m--));
+        t = array[m];
+        array[m] = array[i];
+        array[i] = t;
+    }
+    return array;
 }
