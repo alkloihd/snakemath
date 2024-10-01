@@ -39,7 +39,7 @@ let canvas_x, canvas_y;
 
 function setup() {
     // Adjusted Canvas Size: 1040x780 (1040 width, 680 game area + 100 top panel)
-    canvas = createCanvas(1040, 780);
+    canvas = createCanvas(800, 600);
     canvas.style('display', 'block'); // Ensure block display for centering
 
     // Calculate and set the canvas position to center it in the window
