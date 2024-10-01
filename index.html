@@ -5,33 +5,29 @@
     <title>Math Snake by M. Lodhia</title>
     <!-- Include p5.js Library -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.6.0/p5.min.js"></script>
-    <!-- Link to External CSS -->
-    <link rel="stylesheet" href="style.css">
+    <style>
+        body {
+            background-color: #32A852; /* Dark green background */
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        #game-container {
+            position: relative;
+            width: 1040px;
+            height: 780px;
+        }
+        #defaultCanvas0 {
+            border: 2px solid #000;
+            display: block;
+        }
+    </style>
 </head>
 <body>
-    <!-- Welcome Screen -->
-    <div id="welcome-screen" class="screen">
-        <h1>Math Snake by M. Lodhia</h1>
-        <p>Use arrow keys to play and press Esc to pause</p>
-        <div class="speed-selection">
-            <label>Game Speed:</label>
-            <div class="buttons">
-                <button class="speed-btn" data-speed="1">1</button>
-                <button class="speed-btn" data-speed="2">2</button>
-                <button class="speed-btn" data-speed="3" id="default-speed">3</button>
-                <button class="speed-btn" data-speed="4">4</button>
-                <button class="speed-btn" data-speed="5">5</button>
-            </div>
-        </div>
-        <button id="start-button">Start Game</button>
-    </div>
-
-    <!-- Game Container -->
-    <div id="game-container" style="display: none;">
-        <!-- p5.js will append the canvas here -->
-    </div>
-
-    <!-- Link to External JavaScript -->
+    <div id="game-container"></div>
     <script src="sketch.js"></script>
 </body>
 </html>
