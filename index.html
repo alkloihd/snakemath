@@ -10,12 +10,24 @@
             background-color: #32A852; /* Dark green background */
             margin: 0;
             padding: 0;
-            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        #game-container {
+            position: relative;
+            width: 1040px;
+            height: 780px;
+        }
+        #defaultCanvas0 {
+            border: 2px solid #000;
+            display: block;
         }
     </style>
 </head>
 <body>
-    <!-- Game will be rendered here by p5.js -->
+    <div id="game-container"></div>
     <script src="sketch.js"></script>
 </body>
 </html>
