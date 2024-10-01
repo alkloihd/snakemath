@@ -36,11 +36,12 @@ let welcomeScreen;
 let startButton;
 let speedButtons;
 
+// p5.js Canvas
+let canvas;
+
 function setup() {
-    // Adjusted Canvas Size: 800x700 (800 width, 600 game area + 100 top panel)
-    let canvas = createCanvas(CELL_SIZE * GRID_WIDTH, CELL_SIZE * GRID_HEIGHT + 100);
-    canvas.parent('game-container'); // Append canvas to a container if needed
-    frameRate(FPS_VALUES[selected_speed]);
+    // No canvas creation here. Canvas will be created when the game starts.
+    noCanvas(); // Remove default canvas creation
     textFont('Arial');
     initSnake();
     initFood();
@@ -122,7 +123,9 @@ window.addEventListener('DOMContentLoaded', () => {
             button.classList.add('active');
             // Update selected speed
             selected_speed = parseInt(button.getAttribute('data-speed'));
-            frameRate(FPS_VALUES[selected_speed]);
+            if (game_state === 'RUNNING') {
+                frameRate(FPS_VALUES[selected_speed]);
+            }
         });
     });
 
@@ -131,7 +134,14 @@ window.addEventListener('DOMContentLoaded', () => {
 
     // Start Button Event Listener
     startButton.addEventListener('click', () => {
+        // Hide welcome screen
         welcomeScreen.style.display = 'none';
+        // Show game container
+        document.getElementById('game-container').style.display = 'block';
+        // Create the canvas and append to game-container
+        canvas = createCanvas(CELL_SIZE * GRID_WIDTH, CELL_SIZE * GRID_HEIGHT + 100);
+        canvas.parent('game-container');
+        frameRate(FPS_VALUES[selected_speed]);
         game_state = 'RUNNING';
     });
 });
@@ -439,11 +449,6 @@ function drawCheckMarks() {
     }
 }
 
-// Function to draw the welcome screen (No longer needed as it's handled by HTML/CSS)
-// function drawWelcomeScreen() {
-//     // Removed as welcome screen is now handled by HTML/CSS
-// }
-
 // Function to draw the pause menu
 function drawPauseMenu() {
     fill('rgba(0,0,0,0.5)');
@@ -491,7 +496,7 @@ function resetGame() {
 function shuffle(array, bool=false) {
     let m = array.length, t, i;
     while (m) {
-        i = Math.floor(random(0, m--));
+        i = floor(random(0, m--));
         t = array[m];
         array[m] = array[i];
         array[i] = t;
