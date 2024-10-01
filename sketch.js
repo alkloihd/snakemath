@@ -1,7 +1,8 @@
 // Game Constants
 const CELL_SIZE = 40;
-const GRID_WIDTH = 26;  // 1040 / 40
-const GRID_HEIGHT = 17; // 680 / 40
+const GRID_WIDTH = 26;  // Increased by 6 (3 on each side)
+const GRID_HEIGHT = 17; // Increased by 2
+const TOP_PANEL_HEIGHT = 100;
 const BG_COLOR = '#32A852';
 const TOP_PANEL_COLOR = '#228B22';
 const FOOD_COLOR = '#C8C8C8';
@@ -10,6 +11,9 @@ const TEXT_COLOR = '#FFFFFF';
 const X_COLOR = '#FF0000';
 const CHECK_COLOR = '#00FF00';
 const FPS_VALUES = {1:5, 2:6, 3:7, 4:8, 5:9}; // Speed selection mapping
+
+const CANVAS_WIDTH = CELL_SIZE * GRID_WIDTH; // 40 * 26 = 1040
+const CANVAS_HEIGHT = CELL_SIZE * GRID_HEIGHT + TOP_PANEL_HEIGHT; // 40 * 17 + 100 = 780
 
 let snake = [];
 let direction = 'RIGHT';
@@ -28,25 +32,18 @@ let selected_speed = 3; // Default speed
 let speedButtons = [];
 let startButton;
 
-// Labels
-let speedLabelElement;
-let titleElement;
-let subtitleElement;
+// Title and Subtitle
+let title = "Math Snake by M. Lodhia";
+let subtitle = "Use arrow keys to play and press Esc to pause";
 
-// Canvas
+// Game Speed Label
+let speedLabel = "Game Speed";
+
 let canvas;
-let canvas_x, canvas_y;
 
 function setup() {
-    // Adjusted Canvas Size: 1040x780 (1040 width, 680 game area + 100 top panel)
-    canvas = createCanvas(800, 600);
-    canvas.style('display', 'block'); // Ensure block display for centering
-
-    // Calculate and set the canvas position to center it in the window
-    canvas_x = (windowWidth - width) / 2;
-    canvas_y = (windowHeight - height) / 2;
-    canvas.position(canvas_x, canvas_y);
-
+    canvas = createCanvas(CANVAS_WIDTH, CANVAS_HEIGHT);
+    centerCanvas();
     frameRate(FPS_VALUES[selected_speed]);
     textFont('Arial');
     initSnake();
@@ -54,11 +51,44 @@ function setup() {
     createWelcomeScreen();
 }
 
+function windowResized() {
+    centerCanvas();
+}
+
+function centerCanvas() {
+    let x = (windowWidth - width) / 2;
+    let y = (windowHeight - height) / 2;
+    canvas.position(x, y);
+    positionButtons();
+}
+
+function positionButtons() {
+    // Position buttons relative to the canvas position
+    // Calculate total width: 5 buttons * 60 + 4 gaps * 20 = 300 + 80 = 380
+    let total_buttons_width = 5 * 60 + 4 * 20;
+    let start_x = (width - total_buttons_width) / 2;
+    let canvasX = (windowWidth - width) / 2;
+    let canvasY = (windowHeight - height) / 2;
+
+    // Position the speed buttons
+    for (let i = 0; i < speedButtons.length; i++) {
+        let btn = speedButtons[i];
+        let x = canvasX + start_x + i * 80;
+        let y = canvasY + 220; // Adjust Y position as needed
+        btn.position(x, y);
+    }
+
+    // Position the Start Game button
+    let startButtonX = canvasX + width / 2 - 100;
+    let startButtonY = canvasY + 300; // Adjust Y position as needed
+    startButton.position(startButtonX, startButtonY);
+}
+
 function draw() {
     background(BG_COLOR);
 
     if (game_state === 'WELCOME') {
-        // Welcome screen elements are handled by DOM elements
+        drawWelcomeScreen();
         return; // Skip other drawing
     }
 
@@ -117,34 +147,11 @@ function keyPressed() {
     }
 }
 
-// Function to create Welcome Screen Elements
+// Function to create Welcome Screen Buttons
 function createWelcomeScreen() {
-    // Create Title
-    titleElement = createElement('h1', 'Math Snake by M. Lodhia');
-    titleElement.style('color', TEXT_COLOR);
-    titleElement.style('font-size', '40px');
-    titleElement.position(canvas_x + width / 2 - titleElement.elt.offsetWidth / 2, 80 + canvas_y);
-
-    // Create Subtitle
-    subtitleElement = createElement('h3', 'Use arrow keys to play and press Esc to pause');
-    subtitleElement.style('color', TEXT_COLOR);
-    subtitleElement.style('font-size', '20px');
-    subtitleElement.position(canvas_x + width / 2 - subtitleElement.elt.offsetWidth / 2, 130 + canvas_y);
-
-    // Create Game Speed Label
-    speedLabelElement = createElement('h2', 'Game Speed');
-    speedLabelElement.style('color', TEXT_COLOR);
-    speedLabelElement.style('font-size', '22px');
-    speedLabelElement.position(canvas_x + width / 2 - speedLabelElement.elt.offsetWidth / 2, 150 + canvas_y);
-
     // Create Speed Selection Buttons
-    // Total width: 5 buttons * 60 + 4 gaps * 20 = 300 + 80 = 380
-    let total_buttons_width = 5 * 60 + 4 * 20;
-    let start_x = (width - total_buttons_width) / 2; // 330px
-
     for (let i = 1; i <=5; i++) {
         let btn = createButton(i.toString());
-        btn.position(canvas_x + start_x + (i-1)*80, 220 + canvas_y); // y-position set to 220px
         btn.size(60, 60);
         btn.style('font-size', '20px');
         btn.style('background-color', '#FFF');
@@ -155,12 +162,13 @@ function createWelcomeScreen() {
 
     // Create Start Button
     startButton = createButton('Start Game');
-    startButton.position(canvas_x + (width / 2 - 100), 300 + canvas_y); // Centered horizontally, y=300px
     startButton.size(200, 60);
     startButton.style('font-size', '24px');
     startButton.style('background-color', '#FFF');
     startButton.style('border', '2px solid #000');
     startButton.mousePressed(() => startGame());
+
+    positionButtons();
 }
 
 function selectSpeed(speed) {
@@ -178,10 +186,7 @@ function selectSpeed(speed) {
 
 function startGame() {
     game_state = 'RUNNING';
-    // Hide welcome screen elements
-    titleElement.hide();
-    subtitleElement.hide();
-    speedLabelElement.hide();
+    // Hide buttons
     speedButtons.forEach(btn => btn.hide());
     startButton.hide();
 }
@@ -308,8 +313,8 @@ function handleCollisions() {
                 score_correct +=1;
                 score_total +=1;
                 lives +=1;
-                emitConfetti((head.x + 0.5) * CELL_SIZE, (head.y + 0.5) * CELL_SIZE + 100);
-                emitCheckMark((head.x + 0.5) * CELL_SIZE, (head.y + 0.5) * CELL_SIZE + 100);
+                emitConfetti((head.x + 0.5) * CELL_SIZE, (head.y + 0.5) * CELL_SIZE + TOP_PANEL_HEIGHT);
+                emitCheckMark((head.x + 0.5) * CELL_SIZE, (head.y + 0.5) * CELL_SIZE + TOP_PANEL_HEIGHT);
                 // Generate new problem
                 generateFood();
             } else {
@@ -319,7 +324,7 @@ function handleCollisions() {
                 }
                 score_total +=1;
                 lives -=1;
-                emitXMark((item.x + 0.5) * CELL_SIZE, (item.y + 0.5) * CELL_SIZE + 100);
+                emitXMark((item.x + 0.5) * CELL_SIZE, (item.y + 0.5) * CELL_SIZE + TOP_PANEL_HEIGHT);
                 // Remove incorrect food
                 food.splice(i,1);
             }
@@ -335,7 +340,7 @@ function handleCollisions() {
 function drawTopPanel() {
     fill(TOP_PANEL_COLOR);
     noStroke();
-    rect(0, 0, width, 100);
+    rect(0, 0, width, TOP_PANEL_HEIGHT);
 
     // Draw Math Problem
     fill(TEXT_COLOR);
@@ -353,9 +358,9 @@ function drawGrid() {
     stroke(0);
     strokeWeight(1); // Ensure grid lines are not bold
     for (let x = 0; x <= width; x += CELL_SIZE) {
-        line(x, 100, x, height);
+        line(x, TOP_PANEL_HEIGHT, x, height);
     }
-    for (let y = 100; y <= height; y += CELL_SIZE) {
+    for (let y = TOP_PANEL_HEIGHT; y <= height; y += CELL_SIZE) {
         line(0, y, width, y);
     }
 }
@@ -364,7 +369,7 @@ function drawSnake() {
     for (let i =0; i < snake.length; i++) {
         let segment = snake[i];
         let seg_x = segment.x * CELL_SIZE + CELL_SIZE/4;
-        let seg_y = segment.y * CELL_SIZE + 100 + CELL_SIZE/4;
+        let seg_y = segment.y * CELL_SIZE + TOP_PANEL_HEIGHT + CELL_SIZE/4;
         fill(SNAKE_COLOR);
         noStroke();
         rect(seg_x, seg_y, CELL_SIZE/2, CELL_SIZE/2);
@@ -388,12 +393,12 @@ function drawFoodItems() {
     for (let item of food) {
         fill(FOOD_COLOR);
         stroke(0);
-        rect(item.x * CELL_SIZE, item.y * CELL_SIZE + 100, CELL_SIZE, CELL_SIZE);
+        rect(item.x * CELL_SIZE, item.y * CELL_SIZE + TOP_PANEL_HEIGHT, CELL_SIZE, CELL_SIZE);
         fill(TEXT_COLOR);
         noStroke();
         textSize(24);
         textAlign(CENTER, CENTER);
-        text(item.value, (item.x +0.5)*CELL_SIZE, (item.y +0.5)*CELL_SIZE + 100);
+        text(item.value, (item.x +0.5)*CELL_SIZE, (item.y +0.5)*CELL_SIZE + TOP_PANEL_HEIGHT);
     }
 }
 
@@ -471,6 +476,24 @@ function drawCheckMarks() {
     }
 }
 
+function drawWelcomeScreen() {
+    // Draw Title
+    fill(TEXT_COLOR);
+    textSize(32);
+    textAlign(CENTER, CENTER);
+    text(title, width / 2, 80); // y-position set to 80px
+
+    // Draw Subtitle
+    textSize(20);
+    text(subtitle, width / 2, 130); // y-position set to 130px
+
+    // Draw Game Speed Label
+    textSize(24);
+    text(speedLabel, width / 2, 180); // y-position set to 180px
+
+    // Buttons are already created and positioned
+}
+
 function drawPauseMenu() {
     fill('rgba(0,0,0,0.5)');
     noStroke();
@@ -509,33 +532,4 @@ function resetGame() {
     x_marks = [];
     check_marks = [];
     confetti_particles = [];
-}
-
-function windowResized() {
-    // Recenter the canvas
-    canvas_x = (windowWidth - width) / 2;
-    canvas_y = (windowHeight - height) / 2;
-    canvas.position(canvas_x, canvas_y);
-
-    if (game_state === 'WELCOME') {
-        // Reposition Title
-        titleElement.position(canvas_x + width / 2 - titleElement.elt.offsetWidth / 2, 80 + canvas_y);
-
-        // Reposition Subtitle
-        subtitleElement.position(canvas_x + width / 2 - subtitleElement.elt.offsetWidth / 2, 130 + canvas_y);
-
-        // Reposition Game Speed Label
-        speedLabelElement.position(canvas_x + width / 2 - speedLabelElement.elt.offsetWidth / 2, 180 + canvas_y);
-
-        // Reposition Speed Buttons
-        let total_buttons_width = 5 * 60 + 4 * 20; // 380px
-        let start_x = (width - total_buttons_width) / 2; // 330px
-        for (let i = 0; i < speedButtons.length; i++) {
-            let btn = speedButtons[i];
-            btn.position(canvas_x + start_x + (i)*80, 220 + canvas_y);
-        }
-
-        // Reposition Start Button
-        startButton.position(canvas_x + (width / 2 - 100), 300 + canvas_y);
-    }
 }
