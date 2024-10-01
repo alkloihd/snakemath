@@ -122,7 +122,7 @@ function createWelcomeScreen() {
     // Create Title
     titleElement = createElement('h1', 'Math Snake by M. Lodhia');
     titleElement.style('color', TEXT_COLOR);
-    titleElement.style('font-size', '32px');
+    titleElement.style('font-size', '40px');
     titleElement.position(canvas_x + width / 2 - titleElement.elt.offsetWidth / 2, 80 + canvas_y);
 
     // Create Subtitle
@@ -134,8 +134,8 @@ function createWelcomeScreen() {
     // Create Game Speed Label
     speedLabelElement = createElement('h2', 'Game Speed');
     speedLabelElement.style('color', TEXT_COLOR);
-    speedLabelElement.style('font-size', '24px');
-    speedLabelElement.position(canvas_x + width / 2 - speedLabelElement.elt.offsetWidth / 2, 180 + canvas_y);
+    speedLabelElement.style('font-size', '22px');
+    speedLabelElement.position(canvas_x + width / 2 - speedLabelElement.elt.offsetWidth / 2, 150 + canvas_y);
 
     // Create Speed Selection Buttons
     // Total width: 5 buttons * 60 + 4 gaps * 20 = 300 + 80 = 380
