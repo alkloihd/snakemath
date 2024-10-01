@@ -4,7 +4,7 @@ const GRID_HEIGHT = 17; // Original 15 + 2 additional boxes
 const CELL_SIZE = 800 / GRID_WIDTH; // Adjusted CELL_SIZE
 const BG_COLOR = '#32A852';
 const TOP_PANEL_COLOR = '#228B22';
-const FOOD_COLOR = '#FFFFFF'; // Changed to white for higher contrast
+const FOOD_COLOR = '#FFFFFF'; // White background for food
 const FOOD_TEXT_COLOR = '#000000'; // Black text on food
 const SNAKE_COLOR = '#0000FF';
 const TEXT_COLOR = '#FFFFFF';
@@ -12,10 +12,11 @@ const X_COLOR = '#FF0000';
 const CHECK_COLOR = '#00FF00';
 const FPS_VALUES = {1:5, 2:6, 3:7, 4:8, 5:9}; // Speed selection mapping
 const MAX_SNAKE_LENGTH = 24; // Maximum snake length
+const INITIAL_LIVES = 10; // Starting lives and snake length
 
 let snake = [];
 let direction = 'RIGHT';
-let lives = 10; // Start with 10 lives
+let lives = INITIAL_LIVES; // Start with 10 lives
 let score_correct = 0;
 let score_total = 0;
 let current_problem = {};
@@ -96,7 +97,7 @@ function keyPressed() {
             direction = 'LEFT';
         } else if ((keyCode === RIGHT_ARROW || key === 'D' || key === 'd') && direction !== 'LEFT') {
             direction = 'RIGHT';
-        } else if (key === 'Escape') {
+        } else if (keyCode === 27) { // Escape key
             game_state = 'PAUSED';
         }
     }
@@ -113,8 +114,14 @@ function keyPressed() {
         if (key === 'R' || key === 'r') {
             resetGame();
         } else if (key === 'Q' || key === 'q') {
-            // Reload the page to restart
-            window.location.reload();
+            // Return to main menu
+            lives = INITIAL_LIVES;
+            score_correct = 0;
+            score_total = 0;
+            game_state = 'WELCOME';
+            initSnake();
+            initFood();
+            createWelcomeScreen();
         }
     }
 }
@@ -170,7 +177,7 @@ function initSnake() {
     snake = [];
     let center_x = floor(GRID_WIDTH / 2);
     let center_y = floor(GRID_HEIGHT / 2);
-    for (let i = 0; i < 5; i++) {
+    for (let i = 0; i < INITIAL_LIVES; i++) {
         snake.push({ x: center_x - i, y: center_y });
     }
 }
@@ -289,8 +296,8 @@ function handleCollisions() {
 
                 // Increase lives and grow snake every 5 correct answers
                 if (score_correct % 5 === 0) {
-                    lives += 1;
-                    if (snake.length < MAX_SNAKE_LENGTH) {
+                    if (lives < MAX_SNAKE_LENGTH) {
+                        lives += 1;
                         snake.push(Object.assign({}, snake[snake.length - 1]));
                     }
                 }
@@ -507,7 +514,7 @@ function resetGame() {
     initSnake();
     initFood();
     direction = 'RIGHT';
-    lives = 10; // Reset lives to 10
+    lives = INITIAL_LIVES; // Reset lives to initial value
     score_correct = 0;
     score_total = 0;
     game_state = 'RUNNING';
