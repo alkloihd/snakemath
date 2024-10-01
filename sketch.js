@@ -110,17 +110,19 @@ function keyPressed() {
 
 // Function to create Welcome Screen Buttons
 function createWelcomeScreen() {
-    // Create Game Speed Label
-    // Note: We'll draw this on the canvas in drawWelcomeScreen()
-
     // Create Speed Selection Buttons
     // Total width: 5 buttons *60 + 4 gaps *20 = 300 + 80 = 380
     let total_buttons_width = 5 * 60 + 4 * 20;
-    let start_x = (width - total_buttons_width) / 2; // 1040 -380=660/2=330
+    let start_x = (width - total_buttons_width) / 2; // (1040 - 380) / 2 = 330px
+
+    // Positioning Variables
+    let speedLabelY = 180; // Y-position of "Game Speed" text
+    let buttonsY = speedLabelY + 30; // 30px below the "Game Speed" text
 
     for (let i = 1; i <=5; i++) {
         let btn = createButton(i.toString());
-        btn.position(start_x + (i-1)*80, 220); // y=220px, x=330,410,...,650px
+        btn.parent('game-container'); // Set parent to game-container for relative positioning
+        btn.position(start_x + (i-1)*80, buttonsY); // y=210px
         btn.size(60, 60);
         btn.style('font-size', '20px');
         btn.style('background-color', '#FFF');
@@ -130,8 +132,10 @@ function createWelcomeScreen() {
     }
 
     // Create Start Button
+    let startButtonY = buttonsY + 80; // 80px below the speed buttons
     startButton = createButton('Start Game');
-    startButton.position(width / 2 - 100, 300); // x=420px, y=300px
+    startButton.parent('game-container'); // Set parent to game-container for relative positioning
+    startButton.position(width / 2 - 100, startButtonY); // Centered horizontally, y=290px
     startButton.size(200, 60);
     startButton.style('font-size', '24px');
     startButton.style('background-color', '#FFF');
@@ -500,4 +504,8 @@ function resetGame() {
     x_marks = [];
     check_marks = [];
     confetti_particles = [];
+
+    // Reset and show buttons again
+    speedButtons.forEach(btn => btn.show());
+    startButton.show();
 }
