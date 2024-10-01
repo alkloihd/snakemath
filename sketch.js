@@ -1,19 +1,21 @@
 // Game Constants
-const CELL_SIZE = 40;
 const GRID_WIDTH = 26;  // Original 20 + 6 additional boxes
 const GRID_HEIGHT = 17; // Original 15 + 2 additional boxes
+const CELL_SIZE = 800 / GRID_WIDTH; // Adjusted CELL_SIZE
 const BG_COLOR = '#32A852';
 const TOP_PANEL_COLOR = '#228B22';
-const FOOD_COLOR = '#C8C8C8';
+const FOOD_COLOR = '#FFFFFF'; // Changed to white for higher contrast
+const FOOD_TEXT_COLOR = '#000000'; // Black text on food
 const SNAKE_COLOR = '#0000FF';
 const TEXT_COLOR = '#FFFFFF';
 const X_COLOR = '#FF0000';
 const CHECK_COLOR = '#00FF00';
 const FPS_VALUES = {1:5, 2:6, 3:7, 4:8, 5:9}; // Speed selection mapping
+const MAX_SNAKE_LENGTH = 24; // Maximum snake length
 
 let snake = [];
 let direction = 'RIGHT';
-let lives = 5;
+let lives = 10; // Start with 10 lives
 let score_correct = 0;
 let score_total = 0;
 let current_problem = {};
@@ -30,18 +32,27 @@ let startButton;
 
 // Title and Subtitle
 let title = "Math Snake by M. Lodhia";
-let subtitle = "Use arrow keys to play and press Esc to pause";
+let subtitle = "Use arrow keys or WASD to play and press Esc to pause";
 
 // Game Speed Label
 let speedLabel = "Game Speed";
 
+let canvas; // Declare canvas globally
+let canvasX, canvasY; // To store canvas position
+
 function setup() {
-    let canvas = createCanvas(CELL_SIZE * GRID_WIDTH, CELL_SIZE * GRID_HEIGHT + 100); // 1040x780
+    canvas = createCanvas(CELL_SIZE * GRID_WIDTH, CELL_SIZE * GRID_HEIGHT + 100);
     canvas.parent('game-container');
     frameRate(FPS_VALUES[selected_speed]);
     textFont('Arial');
     initSnake();
     initFood();
+
+    // Get canvas position
+    let canvasRect = canvas.elt.getBoundingClientRect();
+    canvasX = canvasRect.left;
+    canvasY = canvasRect.top;
+
     createWelcomeScreen();
 }
 
@@ -77,13 +88,13 @@ function draw() {
 
 function keyPressed() {
     if (game_state === 'RUNNING') {
-        if (keyCode === UP_ARROW && direction !== 'DOWN') {
+        if ((keyCode === UP_ARROW || key === 'W' || key === 'w') && direction !== 'DOWN') {
             direction = 'UP';
-        } else if (keyCode === DOWN_ARROW && direction !== 'UP') {
+        } else if ((keyCode === DOWN_ARROW || key === 'S' || key === 's') && direction !== 'UP') {
             direction = 'DOWN';
-        } else if (keyCode === LEFT_ARROW && direction !== 'RIGHT') {
+        } else if ((keyCode === LEFT_ARROW || key === 'A' || key === 'a') && direction !== 'RIGHT') {
             direction = 'LEFT';
-        } else if (keyCode === RIGHT_ARROW && direction !== 'LEFT') {
+        } else if ((keyCode === RIGHT_ARROW || key === 'D' || key === 'd') && direction !== 'LEFT') {
             direction = 'RIGHT';
         } else if (key === 'Escape') {
             game_state = 'PAUSED';
@@ -110,17 +121,13 @@ function keyPressed() {
 
 // Function to create Welcome Screen Buttons
 function createWelcomeScreen() {
-    // Create Game Speed Label
-    // Note: We'll draw this on the canvas in drawWelcomeScreen()
-
     // Create Speed Selection Buttons
-    // Total width: 5 buttons *60 + 4 gaps *20 = 300 + 80 = 380
     let total_buttons_width = 5 * 60 + 4 * 20;
-    let start_x = (width - total_buttons_width) / 2; // 1040 -380=660/2=330
+    let start_x = (width - total_buttons_width) / 2;
 
-    for (let i = 1; i <=5; i++) {
+    for (let i = 1; i <= 5; i++) {
         let btn = createButton(i.toString());
-        btn.position(start_x + (i-1)*80, 220); // y=220px, x=330,410,...,650px
+        btn.position(start_x + (i - 1) * 80 + canvasX, 220 + canvasY); // Adjusted position
         btn.size(60, 60);
         btn.style('font-size', '20px');
         btn.style('background-color', '#FFF');
@@ -131,7 +138,7 @@ function createWelcomeScreen() {
 
     // Create Start Button
     startButton = createButton('Start Game');
-    startButton.position(width / 2 - 100, 300); // x=420px, y=300px
+    startButton.position(width / 2 - 100 + canvasX, 300 + canvasY); // Adjusted position
     startButton.size(200, 60);
     startButton.style('font-size', '24px');
     startButton.style('background-color', '#FFF');
@@ -144,7 +151,7 @@ function selectSpeed(speed) {
     frameRate(FPS_VALUES[selected_speed]);
     // Highlight selected button
     speedButtons.forEach((btn, index) => {
-        if (index +1 === speed) {
+        if (index + 1 === speed) {
             btn.style('background-color', '#AAF'); // Highlight color
         } else {
             btn.style('background-color', '#FFF'); // Default color
@@ -164,7 +171,7 @@ function initSnake() {
     let center_x = floor(GRID_WIDTH / 2);
     let center_y = floor(GRID_HEIGHT / 2);
     for (let i = 0; i < 5; i++) {
-        snake.push({x: center_x - i, y: center_y});
+        snake.push({ x: center_x - i, y: center_y });
     }
 }
 
@@ -173,7 +180,7 @@ function generateMathProblem() {
     let operation = random(operations);
     let a, b, question, answer;
 
-    switch(operation) {
+    switch (operation) {
         case '+':
             a = floor(random(0, 51));
             b = floor(random(0, 51 - a));
@@ -200,10 +207,10 @@ function generateMathProblem() {
             break;
     }
 
-    return {question, answer};
+    return { question, answer };
 }
 
-function generateIncorrectAnswers(correct_answer, count=3) {
+function generateIncorrectAnswers(correct_answer, count = 3) {
     let incorrect = new Set();
     while (incorrect.size < count) {
         let delta = floor(random(-10, 11));
@@ -230,7 +237,7 @@ function generateFood() {
     all_answers.forEach(value => {
         let pos;
         do {
-            pos = {x: floor(random(0, GRID_WIDTH)), y: floor(random(0, GRID_HEIGHT))};
+            pos = { x: floor(random(0, GRID_WIDTH)), y: floor(random(0, GRID_HEIGHT)) };
         } while (food_positions.has(`${pos.x},${pos.y}`));
         food_positions.add(`${pos.x},${pos.y}`);
         food.push({
@@ -249,18 +256,18 @@ function initFood() {
 
 function moveSnake() {
     let head = Object.assign({}, snake[0]);
-    switch(direction) {
+    switch (direction) {
         case 'UP':
-            head.y -=1;
+            head.y -= 1;
             break;
         case 'DOWN':
-            head.y +=1;
+            head.y += 1;
             break;
         case 'LEFT':
-            head.x -=1;
+            head.x -= 1;
             break;
         case 'RIGHT':
-            head.x +=1;
+            head.x += 1;
             break;
     }
     // Wrap around the grid
@@ -277,10 +284,17 @@ function handleCollisions() {
         if (head.x === item.x && head.y === item.y) {
             if (item.is_correct) {
                 // Correct Answer
-                snake.push(Object.assign({}, snake[snake.length -1]));
-                score_correct +=1;
-                score_total +=1;
-                lives +=1;
+                score_correct += 1;
+                score_total += 1;
+
+                // Increase lives and grow snake every 5 correct answers
+                if (score_correct % 5 === 0) {
+                    lives += 1;
+                    if (snake.length < MAX_SNAKE_LENGTH) {
+                        snake.push(Object.assign({}, snake[snake.length - 1]));
+                    }
+                }
+
                 emitConfetti((head.x + 0.5) * CELL_SIZE, (head.y + 0.5) * CELL_SIZE + 100);
                 emitCheckMark((head.x + 0.5) * CELL_SIZE, (head.y + 0.5) * CELL_SIZE + 100);
                 // Generate new problem
@@ -290,17 +304,17 @@ function handleCollisions() {
                 if (snake.length > 1) {
                     snake.pop(); // Shrink Snake
                 }
-                score_total +=1;
-                lives -=1;
+                score_total += 1;
+                lives -= 1;
                 emitXMark((item.x + 0.5) * CELL_SIZE, (item.y + 0.5) * CELL_SIZE + 100);
                 // Remove incorrect food
-                food.splice(i,1);
+                food.splice(i, 1);
             }
             break;
         }
     }
 
-    if (lives <=0) {
+    if (lives <= 0) {
         game_state = 'GAME_OVER';
     }
 }
@@ -334,25 +348,25 @@ function drawGrid() {
 }
 
 function drawSnake() {
-    for (let i =0; i < snake.length; i++) {
+    for (let i = 0; i < snake.length; i++) {
         let segment = snake[i];
-        let seg_x = segment.x * CELL_SIZE + CELL_SIZE/4;
-        let seg_y = segment.y * CELL_SIZE + 100 + CELL_SIZE/4;
+        let seg_x = segment.x * CELL_SIZE + CELL_SIZE / 4;
+        let seg_y = segment.y * CELL_SIZE + 100 + CELL_SIZE / 4;
         fill(SNAKE_COLOR);
         noStroke();
-        rect(seg_x, seg_y, CELL_SIZE/2, CELL_SIZE/2);
-        if (i ===0) {
+        rect(seg_x, seg_y, CELL_SIZE / 2, CELL_SIZE / 2);
+        if (i === 0) {
             // Draw smiley face on the head
             fill(0);
-            ellipse(seg_x + CELL_SIZE/4, seg_y + CELL_SIZE/4, CELL_SIZE/8, CELL_SIZE/8); // Head
+            ellipse(seg_x + CELL_SIZE / 4, seg_y + CELL_SIZE / 4, CELL_SIZE / 8, CELL_SIZE / 8); // Head
             // Eyes
-            ellipse(seg_x + CELL_SIZE/4 - CELL_SIZE/16, seg_y + CELL_SIZE/4 - CELL_SIZE/16, CELL_SIZE/32, CELL_SIZE/32);
-            ellipse(seg_x + CELL_SIZE/4 + CELL_SIZE/16, seg_y + CELL_SIZE/4 - CELL_SIZE/16, CELL_SIZE/32, CELL_SIZE/32);
+            ellipse(seg_x + CELL_SIZE / 4 - CELL_SIZE / 16, seg_y + CELL_SIZE / 4 - CELL_SIZE / 16, CELL_SIZE / 32, CELL_SIZE / 32);
+            ellipse(seg_x + CELL_SIZE / 4 + CELL_SIZE / 16, seg_y + CELL_SIZE / 4 - CELL_SIZE / 16, CELL_SIZE / 32, CELL_SIZE / 32);
             // Mouth
             noFill();
             stroke(0);
             strokeWeight(1);
-            arc(seg_x + CELL_SIZE/4, seg_y + CELL_SIZE/4 + CELL_SIZE/32, CELL_SIZE/8, CELL_SIZE/8, 0, PI);
+            arc(seg_x + CELL_SIZE / 4, seg_y + CELL_SIZE / 4 + CELL_SIZE / 32, CELL_SIZE / 8, CELL_SIZE / 8, 0, PI);
         }
     }
 }
@@ -362,18 +376,18 @@ function drawFoodItems() {
         fill(FOOD_COLOR);
         stroke(0);
         rect(item.x * CELL_SIZE, item.y * CELL_SIZE + 100, CELL_SIZE, CELL_SIZE);
-        fill(TEXT_COLOR);
+        fill(FOOD_TEXT_COLOR);
         noStroke();
-        textSize(24);
+        textSize(CELL_SIZE * 0.6); // Adjusted text size to fit within the box
         textAlign(CENTER, CENTER);
-        text(item.value, (item.x +0.5)*CELL_SIZE, (item.y +0.5)*CELL_SIZE + 100);
+        text(item.value, (item.x + 0.5) * CELL_SIZE, (item.y + 0.5) * CELL_SIZE + 100);
     }
 }
 
 function emitConfetti(x, y) {
-    for (let i=0; i <30; i++) { // Reduced number for performance
+    for (let i = 0; i < 30; i++) {
         let angle = random(TWO_PI);
-        let speed = random(1,3);
+        let speed = random(1, 3);
         confetti_particles.push({
             x: x,
             y: y,
@@ -386,24 +400,24 @@ function emitConfetti(x, y) {
 }
 
 function emitCheckMark(x, y) {
-    check_marks.push({x: x, y: y, lifetime: 30});
+    check_marks.push({ x: x, y: y, lifetime: 30 });
 }
 
 function emitXMark(x, y) {
-    x_marks.push({x: x, y: y, lifetime: 30});
+    x_marks.push({ x: x, y: y, lifetime: 30 });
 }
 
 function emitConfettiParticles() {
-    for (let i = confetti_particles.length -1; i >=0; i--) {
+    for (let i = confetti_particles.length - 1; i >= 0; i--) {
         let particle = confetti_particles[i];
         fill(particle.color);
         noStroke();
-        ellipse(particle.x, particle.y, 5,5);
+        ellipse(particle.x, particle.y, 5, 5);
         particle.x += particle.vx;
         particle.y += particle.vy;
-        particle.lifetime -=1;
-        if (particle.lifetime <=0) {
-            confetti_particles.splice(i,1);
+        particle.lifetime -= 1;
+        if (particle.lifetime <= 0) {
+            confetti_particles.splice(i, 1);
         }
     }
 }
@@ -413,33 +427,33 @@ function drawConfettiParticles() {
 }
 
 function drawXMarks() {
-    for (let i = x_marks.length -1; i >=0; i--) {
+    for (let i = x_marks.length - 1; i >= 0; i--) {
         let mark = x_marks[i];
         stroke(X_COLOR);
         strokeWeight(3);
-        line(mark.x -10, mark.y -10, mark.x +10, mark.y +10);
-        line(mark.x -10, mark.y +10, mark.x +10, mark.y -10);
-        mark.lifetime -=1;
-        if (mark.lifetime <=0) {
-            x_marks.splice(i,1);
+        line(mark.x - 10, mark.y - 10, mark.x + 10, mark.y + 10);
+        line(mark.x - 10, mark.y + 10, mark.x + 10, mark.y - 10);
+        mark.lifetime -= 1;
+        if (mark.lifetime <= 0) {
+            x_marks.splice(i, 1);
         }
     }
 }
 
 function drawCheckMarks() {
-    for (let i = check_marks.length -1; i >=0; i--) {
+    for (let i = check_marks.length - 1; i >= 0; i--) {
         let mark = check_marks[i];
         stroke(CHECK_COLOR);
         strokeWeight(3);
         noFill();
         beginShape();
-        vertex(mark.x -10, mark.y);
-        vertex(mark.x -3, mark.y +10);
-        vertex(mark.x +10, mark.y -5);
+        vertex(mark.x - 10, mark.y);
+        vertex(mark.x - 3, mark.y + 10);
+        vertex(mark.x + 10, mark.y - 5);
         endShape();
-        mark.lifetime -=1;
-        if (mark.lifetime <=0) {
-            check_marks.splice(i,1);
+        mark.lifetime -= 1;
+        if (mark.lifetime <= 0) {
+            check_marks.splice(i, 1);
         }
     }
 }
@@ -465,35 +479,35 @@ function drawWelcomeScreen() {
 function drawPauseMenu() {
     fill('rgba(0,0,0,0.5)');
     noStroke();
-    rect(0,0,width,height);
+    rect(0, 0, width, height);
 
     fill(TEXT_COLOR);
     textSize(24);
     textAlign(CENTER, CENTER);
-    text("Game Paused", width/2, height/2 - 50);
-    text("Press 'C' to Continue or 'R' to Restart.", width/2, height/2);
+    text("Game Paused", width / 2, height / 2 - 50);
+    text("Press 'C' to Continue or 'R' to Restart.", width / 2, height / 2);
 }
 
 function drawGameOver() {
     fill('rgba(0,0,0,0.7)');
     noStroke();
-    rect(0,0,width,height);
+    rect(0, 0, width, height);
 
     fill(TEXT_COLOR);
     textSize(40);
     textAlign(CENTER, CENTER);
-    text("Game Over!", width/2, height/2 - 100);
+    text("Game Over!", width / 2, height / 2 - 100);
 
     textSize(24);
-    text(`Final Score: ${score_correct}/${score_total}`, width/2, height/2 - 50);
-    text("Press 'R' to Restart or 'Q' to Quit.", width/2, height/2);
+    text(`Final Score: ${score_correct}/${score_total}`, width / 2, height / 2 - 50);
+    text("Press 'R' to Restart or 'Q' to Quit.", width / 2, height / 2);
 }
 
 function resetGame() {
     initSnake();
     initFood();
     direction = 'RIGHT';
-    lives = 5;
+    lives = 10; // Reset lives to 10
     score_correct = 0;
     score_total = 0;
     game_state = 'RUNNING';
